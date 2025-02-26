@@ -47,7 +47,7 @@ public class Generate {
         };
     }
 
-    @Bean
+   /* @Bean
     public CommandLineRunner commandLineRunner2() throws  IOException{
 
         byte[] image1 = Files.readAllBytes(Path.of("C:\\Users\\user\\Desktop\\Html\\VueShopify\\Shopify\\src\\assets\\images\\airmax.png"));
@@ -72,5 +72,5 @@ public class Generate {
             productRepository.saveAll(products);
 
         };
-    }
+    }*/
 }
