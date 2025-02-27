@@ -1,37 +1,28 @@
-version: '3.8'
 services:
   postgres:
-    image: postgres:17
-    container_name: shopify-db
-    restart: always
+    container_name: postgres-sql
+    image: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: shopify
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shopify-db
     ports:
       - "5432:5432"
-    networks:
-      - shopify-network
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-
-  backend:
-    build: .
-    container_name: shopify-backend
-    restart: always
-    depends_on:
-      - postgres
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shopify
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: admin
+      - postgres:/var/lib/postgres/data/
+    networks:
+      - spring-postgres
+  spring-boot:
+    container_name: spring-backend
+    image: shopify-backend
     ports:
       - "8080:8080"
     networks:
-      - shopify-network
+      - spring-postgres
+
+volumes:
+  postgres:
 
 networks:
-  shopify-network:
+  spring-postgres:
     driver: bridge
-
