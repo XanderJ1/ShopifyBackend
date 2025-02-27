@@ -1,14 +1,15 @@
-# Use an official OpenJDK image as the base
-FROM openjdk:17-jdk-slim
+FROM maven:3.8.8-eclipse-temurin-17 AS builder
 
-# Set the working directory inside the container
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+FROM openjdk:17-jdk
+
 WORKDIR /app
 
-# Copy the built JAR file from the target folder
-COPY ./target/shopify-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/*.jar /app/app.jar
 
-# Expose the application's port
-EXPOSE 8080
+EXPOSE $PORT
 
-# Run the application
 CMD ["java", "-jar", "app.jar"]
