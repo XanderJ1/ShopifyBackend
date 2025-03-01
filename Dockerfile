@@ -10,6 +10,8 @@ WORKDIR /app
 
 COPY --from=builder /app/target/*.jar /app/app.jar
 
-EXPOSE 8080
+EXPOSE $PORT
 
 CMD ["java", "-jar", "app.jar"]
+
+CMD ["docker", "compose", "up"]
