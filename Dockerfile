@@ -13,5 +13,3 @@ COPY --from=builder /app/target/*.jar /app/app.jar
 EXPOSE $PORT
 
 CMD ["java", "-jar", "app.jar"]
-
-CMD ["docker", "compose", "up"]
