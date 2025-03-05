@@ -1,0 +1,40 @@
+package shopify.Data.DTOs;
+
+import lombok.Data;
+import shopify.Data.Models.Role;
+import shopify.Data.Models.User;
+
+import java.util.stream.Collectors;
+
+@Data
+public class UserDTO {
+    private String username;
+    private String password;
+    private String email;
+    private String role;
+
+    UserDTO(){
+
+    }
+
+    public UserDTO(String username, String password, String email, String role){
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+    }
+
+    public UserDTO(String username, String password, String email){
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
+    public UserDTO(User user) {
+        if (user != null){
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+            this.role = user.getRoles().stream().map(Role::getAuthority).collect(Collectors.toList()).toString();
+        }
+    }
+}

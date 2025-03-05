@@ -5,11 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import shopify.Data.DTOs.RegistrationDTO;
+import shopify.Data.DTOs.UserDTO;
 import shopify.Data.DTOs.SignInDTO;
 import shopify.Data.Models.Role;
 import shopify.Data.Models.User;
@@ -39,7 +38,7 @@ public class AuthenticationService {
         this.roleRepository = roleRepository;
     }
 
-    public void addUser(RegistrationDTO user){
+    public void addUser(UserDTO user){
         Set<Role> roles = new HashSet<>();
         Role role = roleRepository.findByAuthority(user.getRole()).
                 orElseGet(() -> roleRepository.save(new Role("USER")));
