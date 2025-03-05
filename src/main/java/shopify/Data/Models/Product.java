@@ -2,6 +2,7 @@ package shopify.Data.Models;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,8 @@ public class Product {
     private Integer price;
     private String imageName;
     private String imageType;
+    @JsonIgnore
+    @Basic(fetch = FetchType.LAZY)
     @Lob
     private byte[] imageData;
 
@@ -67,6 +70,6 @@ public class Product {
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();  // Exclude assignedUser from hashCode calculation
+        return getClass().hashCode();
     }
 }

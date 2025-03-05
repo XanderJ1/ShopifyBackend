@@ -12,8 +12,11 @@ import shopify.Repositories.ProductRepository;
 import shopify.Repositories.UserRepository;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -47,7 +50,14 @@ public class ProductService {
         productRepository.save(newProduct);
     }
 
-    public Product getProduct(Long id) {
-        return productRepository.findById(id).orElseThrow(RuntimeException::new);
+    public ProductDTO getProduct(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(RuntimeException::new);
+        return new ProductDTO(product);
+    }
+
+    @Transactional
+    public List<ProductDTO> getMyProduct(Long id) {
+        List<Product> products = productRepository.findByAssignedUser_Id(id);
+        return products.stream().map(ProductDTO::new).collect(Collectors.toList());
     }
 }

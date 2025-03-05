@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import shopify.Data.DTOs.RegistrationDTO;
+import shopify.Data.DTOs.UserDTO;
 import shopify.Data.DTOs.SignInDTO;
 import shopify.Data.Models.User;
 import shopify.Repositories.UserRepository;
@@ -40,7 +40,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String > register(@RequestBody RegistrationDTO user){
+    public ResponseEntity<String > register(@RequestBody UserDTO user){
         if (user.getUsername() != null && user.getPassword() != null){
             Optional<User> newUser = userRepository.findByUsername(user.getUsername());
             if (newUser.isPresent()){
