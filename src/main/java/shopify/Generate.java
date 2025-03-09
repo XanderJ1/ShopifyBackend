@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,16 +35,24 @@ public class Generate {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Profile("docker")
     @Bean
-    public CommandLineRunner commandLineRunner() throws Exception {
-
-            Set<Role> roles = new HashSet<Role>();
-            Role role = new Role("ADMIN");
-            roles.add(role);
-            roleRepository.save(role);
-            User bash = new User("bash",
-                    passwordEncoder.encode("test"), "bzakariyya@gmail.com", roles);
+    public CommandLineRunner commandLineRunner1() throws Exception{
+        Set<Role> roles = new HashSet<Role>();
+        Role role = new Role("ADMIN");
+        roles.add(role);
+        roleRepository.save(role);
+        User bash = new User("bash",
+                passwordEncoder.encode("test"), "bzakariyya@gmail.com", roles);
+        userRepository.save(bash);
+        return args -> {
             userRepository.save(bash);
+        };
+    }
+
+    @Profile("local")
+    @Bean
+    public CommandLineRunner commandLineRunner2() throws Exception {
 
         byte[] image1 = Files.readAllBytes(Path.of("C:\\Users\\user\\Desktop\\Html\\VueShopify\\Shopify\\src\\assets\\images\\airmax.png"));
         byte[] image2 = Files.readAllBytes(Path.of("C:\\Users\\user\\Desktop\\Html\\VueShopify\\Shopify\\src\\assets\\images\\airpods-max-headphones-silver.png"));

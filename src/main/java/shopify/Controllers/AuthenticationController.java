@@ -15,6 +15,7 @@ import shopify.Services.AuthenticationService;
 import shopify.Services.TokenService;
 import shopify.Services.UserService;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -55,14 +56,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signIn")
-    public ResponseEntity<String > signIn(@RequestBody SignInDTO body){
+    public ResponseEntity<List<String>> signIn(@RequestBody SignInDTO body){
         try{
             User user = userRepository.findByUsername(body.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("user not found"));
             authenticationService.signIn(body.getUsername(), body.getPassword());
-            return ResponseEntity.ok(tokenService.generate(user));
+            return ResponseEntity.ok(List.of(tokenService.generate(user), user.getId().toString()));
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username or password is incorrect");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }

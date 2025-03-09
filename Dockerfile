@@ -10,6 +10,6 @@ WORKDIR /app
 
 COPY --from=builder /app/target/*.jar /app/app.jar
 
-EXPOSE $PORT
+EXPOSE 80
 
 CMD ["java", "-jar", "app.jar"]

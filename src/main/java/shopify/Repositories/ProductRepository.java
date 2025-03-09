@@ -12,4 +12,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByAssignedUser_Id(Long userId);
 
+    @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Product> search(@Param("name") String name);
 }
