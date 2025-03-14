@@ -1,10 +1,7 @@
 package shopify.Data.DTOs;
 
 import lombok.Data;
-import shopify.Data.Models.Role;
 import shopify.Data.Models.User;
-
-import java.util.stream.Collectors;
 
 @Data
 public class UserDTO {
@@ -34,7 +31,7 @@ public class UserDTO {
         if (user != null){
             this.username = user.getUsername();
             this.email = user.getEmail();
-            this.role = user.getRoles().stream().map(Role::getAuthority).collect(Collectors.toList()).toString();
+            this.role = user.getRole().toString();
         }
     }
 }

@@ -9,9 +9,9 @@ import shopify.Data.Models.User;
 import shopify.Repositories.UserRepository;
 import shopify.Services.AuthenticationService;
 import shopify.Services.ProductService;
+import shopify.Services.UserService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -19,15 +19,21 @@ public class UserController {
 
     final private UserRepository userRepository;
     final private ProductService productService;
+    final private UserService userService;
 
-    public  UserController(UserRepository userRepository, ProductService productService, AuthenticationService authenticationService){
+    public  UserController(
+            UserRepository userRepository,
+            ProductService productService,
+            AuthenticationService authenticationService,
+            UserService userService){
         this.userRepository = userRepository;
         this.productService = productService;
+        this.userService = userService;
     }
 
     @GetMapping("")
     public ResponseEntity<List<UserDTO>> fetchUsers(){
-        return ResponseEntity.ok(userRepository.findAll().stream().map(UserDTO::new).collect(Collectors.toList()));
+        return userService.getAll();
     }
 
     @GetMapping("/{id}/products")
@@ -35,4 +41,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(productService.getMyProduct(id));
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestBody User user){
+        return ResponseEntity.ok(userService.update(user));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser(@RequestParam Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(userService.deleteUser(id));
+    }
 }

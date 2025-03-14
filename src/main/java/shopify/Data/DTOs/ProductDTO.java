@@ -29,4 +29,6 @@ public class ProductDTO {
         this.imageType = product.getImageType();
         this.imageData = Base64.getEncoder().encodeToString(product.getImageData());
     }
+
+
 }
