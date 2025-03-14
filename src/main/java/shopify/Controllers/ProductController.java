@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * REST controller for handling product-related operations.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/products")
@@ -40,7 +43,7 @@ public class ProductController {
     ProductRepository productRepository;
 
     /**
-     * Fetches all product in the database depending on the request parameters
+     * Fetches all products in the database depending on the request parameters
      * @param sort sorts products according to sort value
      * @param filter filters products based on the filter parameters
      * @return Lists of ptoducts
@@ -64,10 +67,10 @@ public class ProductController {
     }
 
     /**
-     * Adds products to the database
+     * Adds a new product to the database
      * @param productDTO the product details
-     * @param file the image file
-     * @return successful message or an error
+     * @param file the image file of the product
+     * @return HTTP status code indicating success or failure
      */
     @PostMapping("")
     public ResponseEntity<String > addProduct(
@@ -83,8 +86,8 @@ public class ProductController {
 
     /**
      * Fetches a product by its id
-     * @param id id of the product
-     * @return a product
+     * @param id ID of the product
+     * @return the product or a 404 HTTP status code
      */
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> fetchProduct(@PathVariable Long id){

@@ -39,6 +39,7 @@ import java.security.interfaces.RSAPrivateKey;
 @Configuration
 public class SecurityConfig {
 
+
     public RSAKeyProperties keys;
 
     SecurityConfig(RSAKeyProperties keys ){
@@ -50,6 +51,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configures authentication controller to use DAO authentication provider
+     * with userService and password encoder
+     * @param userService The service responsible for retrieving user details.
+     * @return Authentication manager instance
+     */
     @Bean
     AuthenticationManager authenticationManager(UserService userService){
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -58,6 +65,13 @@ public class SecurityConfig {
         return new ProviderManager(authProvider);
     }
 
+    /**
+     * Configures the security filter chain to manage authentication and authorization
+     * Allows all /users (For testing purposes), /auth endpoints
+     * @param http The HttpSecurity instance for security configurations
+     * @return The configured SecurityFilterChain.
+     * @throws Exception If an error occurs
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -77,11 +91,19 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Bean for decoding JWT tokens using the application's private RSA key.
+     * @return A JwtDecoder instance for validating JWT tokens.
+     */
     @Bean
     public JwtDecoder jwtDecoder(){
         return NimbusJwtDecoder.withPublicKey(keys.getPublicKey()).build();
     }
 
+    /**
+     * Bean for encoding JWT tokens using the application's private RSA key.
+     * @return A JwtEncoder instance for signing JWT tokens.
+     */
     @Bean
     public JwtEncoder jwtEncoder(){
         JWK jwk = new RSAKey.Builder(keys.getPublicKey())
@@ -90,14 +112,23 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(jwks);
     }
 
+    /**
+     * Configures JWT tokens to extract roles from the token
+     * @return A JwtAuthenticationConverter instance for processing JWT claims
+     */
     JwtAuthenticationConverter jwtAuthenticationConverter(){
         JwtGrantedAuthoritiesConverter jwtAuthConverter = new JwtGrantedAuthoritiesConverter();
         jwtAuthConverter.setAuthoritiesClaimName("roles");
         jwtAuthConverter.setAuthorityPrefix("ROLES_");
-        JwtAuthenticationConverter jwt =new JwtAuthenticationConverter();
+        JwtAuthenticationConverter jwt = new JwtAuthenticationConverter();
         jwt.setJwtGrantedAuthoritiesConverter(jwtAuthConverter);
         return jwt;
     }
+
+    /**
+     * Configures Cross-Origin Resource Sharing (CORS) settings to allow frontend interactions
+     * @return A CCorsConfiguration defining the allowed headers, methods and origin
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();

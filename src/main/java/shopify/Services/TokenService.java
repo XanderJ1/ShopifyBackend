@@ -11,6 +11,9 @@ import shopify.Data.Models.User;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
+/**
+ * Service for handling JWT token generation and decoding.
+ */
 @Service
 public class TokenService {
 
@@ -23,6 +26,12 @@ public class TokenService {
         this.encoder = encoder;
     }
 
+    /**
+     * Generates a JWT token for the given user.
+     *
+     * @param user The user for whom the token is generated.
+     * @return The generated JWT token as a string.
+     */
     public String generate(User user){
         Instant now = Instant.now();
 
