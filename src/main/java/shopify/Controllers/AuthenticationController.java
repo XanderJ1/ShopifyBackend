@@ -18,6 +18,11 @@ import shopify.Services.UserService;
 import java.util.List;
 import java.util.Optional;
 
+
+/**
+ *  Rest controller for handling authentication-related operations such as
+ *  user registration and login.
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
@@ -40,6 +45,13 @@ public class AuthenticationController {
         this.userService = userService;
     }
 
+    /**
+     * Registers a new user
+     * @param user UserDTO with details of user to be registered
+     * @return a ResponseEntity with HTTP status code:
+     * <br> 201 (Created) if registration is successful.
+     * <br> 400 (Bad Request) if the user already exists or required fields are missing.
+     */
     @PostMapping("/register")
     public ResponseEntity<String > register(@RequestBody UserDTO user){
         if (user.getUsername() != null && user.getPassword() != null){
@@ -55,6 +67,13 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enter username or password");
     }
 
+    /**
+     * Logs a user in
+     * @param body SignInDTO containing the user's username and password
+     * @return Response with HTTP status code:
+     * <br> 200 (OK)  and JWT token and user's id on success.
+     * <br> 400 (Bad Request) and failure message if authentication fails
+     */
     @PostMapping("/signIn")
     public ResponseEntity<List<String>> signIn(@RequestBody SignInDTO body){
         try{
@@ -62,8 +81,11 @@ public class AuthenticationController {
                     .orElseThrow(() -> new UsernameNotFoundException("user not found"));
             authenticationService.signIn(body.getUsername(), body.getPassword());
             return ResponseEntity.ok(List.of(tokenService.generate(user), user.getId().toString()));
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }catch (UsernameNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of("User not found"));
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of("username or password is incorrect"));
         }
     }
 }

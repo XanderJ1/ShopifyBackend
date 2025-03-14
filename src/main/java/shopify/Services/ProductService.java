@@ -15,6 +15,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service that handles business logic for product-related operations,
+ * including creation, retrieval, and searching.
+ */
 @Service
 public class ProductService {
 
@@ -32,6 +36,12 @@ public class ProductService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Adds a new product to the database and associates it with the creator
+     * @param body The details about the product
+     * @param file The image file of the product
+     * @throws IOException If there's an error reading the file
+     */
     @Transactional
     public void addProduct(ProductDTO body, MultipartFile file) throws IOException {
         String username = userService.authenticatedUsername();
@@ -47,6 +57,11 @@ public class ProductService {
         productRepository.save(newProduct);
     }
 
+    /**
+     * Fetches a single product by its ID
+     * @param id The ID of the product
+     * @return The product or null if not found
+     */
     @Transactional
     public ProductDTO getProduct(Long id) {
         Optional<Product> product = productRepository.findById(id);
@@ -57,12 +72,22 @@ public class ProductService {
             return new ProductDTO(product.get());
     }
 
+    /**
+     * Fetches products created by a user
+     * @param id The ID of the user
+     * @return list of products
+     */
     @Transactional
     public List<ProductDTO> getMyProduct(Long id) {
         List<Product> products = productRepository.findByAssignedUser_Id(id);
         return products.stream().map(ProductDTO::new).collect(Collectors.toList());
     }
 
+    /**
+     * Search for products by name
+     * @param name name of the product
+     * @return list of matching productDTOs
+     */
     @Transactional
     public List<ProductDTO> searchProduct(String name) {
         return productRepository.search(name.toLowerCase())

@@ -1,3 +1,6 @@
+/**
+ * This package contains business logic of controllers
+ */
 package shopify.Services;
 
 import jakarta.transaction.Transactional;
@@ -25,11 +28,16 @@ public class AuthenticationService {
     @Autowired
     AuthenticationManager authenticationManager;
 
+
     public AuthenticationService(PasswordEncoder passwordEncoder, UserRepository userRepository){
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
+    /**
+     * Adds a user to the user database
+     * @param user userDTO with details to be added
+     */
     public void addUser(UserDTO user){
         User newUser = new User(
                 user.getUsername(),
@@ -44,6 +52,11 @@ public class AuthenticationService {
 
     }
 
+    /**
+     * Logs a user in
+     * @param username user's username
+     * @param password user's password
+     */
     public void signIn(String username, String password) {
         try{
             Authentication auth = authenticationManager
