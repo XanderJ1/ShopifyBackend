@@ -52,7 +52,7 @@ public class AuthenticationController {
                 return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered");
             }
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enter username or password");
     }
 
     @PostMapping("/signIn")

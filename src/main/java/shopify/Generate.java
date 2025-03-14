@@ -5,23 +5,17 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import shopify.Data.Models.Product;
 import shopify.Data.Models.Role;
 import shopify.Data.Models.User;
 import shopify.Repositories.ProductRepository;
-import shopify.Repositories.RoleRepository;
 import shopify.Repositories.UserRepository;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Optional;
-import java.util.Set;
 
 @Configuration
 public class Generate {
@@ -31,19 +25,13 @@ public class Generate {
     @Autowired
     ProductRepository productRepository;
     @Autowired
-    RoleRepository roleRepository;
-    @Autowired
     PasswordEncoder passwordEncoder;
 
     @Profile("docker")
     @Bean
     public CommandLineRunner commandLineRunner1() throws Exception{
-        Set<Role> roles = new HashSet<Role>();
-        Role role = new Role("ADMIN");
-        roles.add(role);
-        roleRepository.save(role);
         User bash = new User("bash",
-                passwordEncoder.encode("test"), "bzakariyya@gmail.com", roles);
+                passwordEncoder.encode("test"), "bzakariyya@gmail.com", Role.ADMIN);
         userRepository.save(bash);
         return args -> {
             userRepository.save(bash);
@@ -53,6 +41,9 @@ public class Generate {
     @Profile("local")
     @Bean
     public CommandLineRunner commandLineRunner2() throws Exception {
+        User bash = new User("bash",
+                passwordEncoder.encode("test"), "bzakariyya@gmail.com", Role.ADMIN);
+        userRepository.save(bash);
 
         byte[] image1 = Files.readAllBytes(Path.of("C:\\Users\\user\\Desktop\\Html\\VueShopify\\Shopify\\src\\assets\\images\\airmax.png"));
         byte[] image2 = Files.readAllBytes(Path.of("C:\\Users\\user\\Desktop\\Html\\VueShopify\\Shopify\\src\\assets\\images\\airpods-max-headphones-silver.png"));

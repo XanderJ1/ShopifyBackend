@@ -51,10 +51,10 @@ public class ProductService {
     public ProductDTO getProduct(Long id) {
         Optional<Product> product = productRepository.findById(id);
         if (product.isEmpty()) {
-            return new ProductDTO(product.get());
+            return null;
         }
         else
-            return null;
+            return new ProductDTO(product.get());
     }
 
     @Transactional

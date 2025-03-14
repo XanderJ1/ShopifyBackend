@@ -12,11 +12,7 @@ import shopify.Data.DTOs.UserDTO;
 import shopify.Data.DTOs.SignInDTO;
 import shopify.Data.Models.Role;
 import shopify.Data.Models.User;
-import shopify.Repositories.RoleRepository;
 import shopify.Repositories.UserRepository;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Transactional
 @Service
@@ -24,30 +20,22 @@ public class AuthenticationService {
 
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     AuthenticationManager authenticationManager;
 
-    public AuthenticationService(PasswordEncoder passwordEncoder,
-                       UserRepository userRepository,
-                       RoleRepository roleRepository){
+    public AuthenticationService(PasswordEncoder passwordEncoder, UserRepository userRepository){
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
     }
 
     public void addUser(UserDTO user){
-        Set<Role> roles = new HashSet<>();
-        Role role = roleRepository.findByAuthority(user.getRole()).
-                orElseGet(() -> roleRepository.save(new Role("USER")));
-        roles.add(role);
         User newUser = new User(
                 user.getUsername(),
                 passwordEncoder.encode(user.getPassword()),
                 user.getEmail(),
-                roles
+                Role.USER
         );
         userRepository.save(newUser);
     }
