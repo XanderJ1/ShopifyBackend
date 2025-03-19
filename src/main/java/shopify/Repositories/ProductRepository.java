@@ -19,7 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      * @param userId The ID of the user
      * @return A product
      */
-    List<Product> findByAssignedUser_Id(Long userId);
+    List<Product> findBySeller_Id(Long userId);
 
     /**
      * Search for a product by its name

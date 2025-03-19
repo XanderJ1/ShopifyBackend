@@ -9,7 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import shopify.Data.DTOs.UserDTO;
+import shopify.Data.Models.Seller;
 import shopify.Data.Models.User;
+import shopify.Data.Models.Buyer;
 import shopify.Repositories.UserRepository;
 
 import java.util.List;
@@ -59,24 +61,41 @@ public class UserService implements UserDetailsService {
      * @return a success message or failure message if the update fails
      */
     public String update(User user) {
-        Optional<User> user1 = userRepository.findById(user.getId());
-        User updatedUser = new User();
-        if (user1.isEmpty()) {
-            return "User does not exist";
-        }else{
-            updatedUser = user1.get();
-
-            if (updatedUser.getUsername() != null) {
-                updatedUser.setUsername(user.getUsername());
+        if (user instanceof Seller) {
+            Optional<User> user1 = userRepository.findById(user.getId());
+            if (user1.isEmpty()) {
+                return "User does not exist";
+            } else {
+                Seller updatedUser = (Seller) user1.get();
+                if (updatedUser.getUsername() != null) {
+                    updatedUser.setUsername(user.getUsername());
+                }
+                if (updatedUser.getEmail() != null) {
+                    updatedUser.setEmail(user.getEmail());
+                }
+                if (updatedUser.getRole() != null) {
+                    updatedUser.setRole(user.getRole());
+                }
+                userRepository.save(updatedUser);
             }
-            if (updatedUser.getEmail() != null) {
-                updatedUser.setEmail(user.getEmail());
+            return "User is updated";
+        }else {
+            Optional<User> user1 = userRepository.findById(user.getId());
+            if (user1.isEmpty()) {
+                return "User does not exist";
+            } else {
+                Buyer updatedUser = (Buyer) user1.get();
+                if (updatedUser.getUsername() != null) {
+                    updatedUser.setUsername(user.getUsername());
+                }
+                if (updatedUser.getEmail() != null) {
+                    updatedUser.setEmail(user.getEmail());
+                }
+                if (updatedUser.getRole() != null) {
+                    updatedUser.setRole(user.getRole());
+                }
+                userRepository.save(updatedUser);
             }
-            if (updatedUser.getRole() != null) {
-                updatedUser.setRole(user.getRole());
-            }
-
-            userRepository.save(updatedUser);
             return "User is updated";
         }
     }

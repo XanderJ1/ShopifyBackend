@@ -2,6 +2,9 @@ package shopify.Controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import shopify.Data.DTOs.ProductDTO;
 import shopify.Data.DTOs.UserDTO;
@@ -22,18 +25,38 @@ import java.util.List;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    final private UserRepository userRepository;
     final private ProductService productService;
     final private UserService userService;
 
     public  UserController(
-            UserRepository userRepository,
             ProductService productService,
             AuthenticationService authenticationService,
             UserService userService){
-        this.userRepository = userRepository;
         this.productService = productService;
         this.userService = userService;
+    }
+
+    /**
+     * This method extracts the current user's id to make operations that needs the user's ID
+     * @return Long user's  ID
+     */
+    public Long userId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println(auth + "Hash" + auth.getPrincipal());
+        if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
+            throw new IllegalStateException("User not authenticated");
+        }
+
+        Object userIdClaim = jwt.getClaim("user_id");
+        if (userIdClaim == null) {
+            throw new IllegalStateException("User ID claim not found in JWT");
+        }
+
+        try {
+            return Long.valueOf(userIdClaim.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Invalid user ID format in JWT", e);
+        }
     }
 
     /**
@@ -47,13 +70,18 @@ public class UserController {
 
     /**
      * Fetches the products associated with a specific user
-     * @param id The ID of the user
      * @return List of products
      */
-    @GetMapping("/{id}/products")
-    public ResponseEntity<List<ProductDTO>> getMyProduct(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(productService.getMyProduct(id));
+    @GetMapping("/products")
+    public ResponseEntity<List<ProductDTO>> getMyProduct(){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.getMyProduct(userId()));
     }
+
+    @GetMapping("/cart")
+    public ResponseEntity<List<ProductDTO>> myCart(){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.myCart(2L));
+    }
+
 
     /**
      * Updates a user's details
@@ -72,6 +100,6 @@ public class UserController {
      */
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteUser(@RequestParam Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(userService.deleteUser(id));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.deleteUser(userId()));
     }
 }

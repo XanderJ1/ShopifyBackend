@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import shopify.Data.Models.Product;
 import shopify.Data.Models.Role;
+import shopify.Data.Models.Seller;
 import shopify.Data.Models.User;
 import shopify.Repositories.ProductRepository;
 import shopify.Repositories.UserRepository;
@@ -30,7 +31,7 @@ public class Generate {
     @Profile("docker")
     @Bean
     public CommandLineRunner commandLineRunner1() throws Exception{
-        User bash = new User("bash",
+        Seller bash = new Seller("bash",
                 passwordEncoder.encode("test"), "bzakariyya@gmail.com", Role.ADMIN);
         userRepository.save(bash);
         return args -> {
@@ -41,7 +42,7 @@ public class Generate {
     @Profile("local")
     @Bean
     public CommandLineRunner commandLineRunner2() throws Exception {
-        User bash = new User("bash",
+        Seller bash = new Seller("bash",
                 passwordEncoder.encode("test"), "bzakariyya@gmail.com", Role.ADMIN);
         userRepository.save(bash);
 
@@ -54,7 +55,7 @@ public class Generate {
         LinkedList<Product> products = new LinkedList<>();
         Optional<User> savedAdmin = userRepository.findByUsername("bash");
         if (savedAdmin.isPresent()) {
-            User admin = savedAdmin.get();
+            Seller admin = (Seller) savedAdmin.get();
             products.add(new Product("Airmax", "Yes", 74, admin, "hedon", "image/png", image1));
             products.add(new Product("Airpods Max Headphones-silver", "Yes", 200, admin, "hedon", "image/png", image2));
             products.add(new Product("AirPods Max Headphones Green", "Yes", 84, admin, "hedon", "image/png", image3));

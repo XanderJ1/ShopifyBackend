@@ -2,24 +2,23 @@ package shopify.Controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import shopify.Data.DTOs.ProductDTO;
-import shopify.Data.Models.Product;
+import shopify.Data.Models.User;
 import shopify.Repositories.ProductRepository;
-import shopify.Repositories.UserRepository;
 import shopify.Services.ProductService;
 import shopify.Services.UserService;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -34,13 +33,29 @@ public class ProductController {
     UserService userService;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
     ProductService productService;
 
     @Autowired
     ProductRepository productRepository;
+
+    public Long userId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
+            throw new IllegalStateException("User not authenticated");
+        }
+
+        Object userIdClaim = jwt.getClaim("user_id");
+        if (userIdClaim == null) {
+            throw new IllegalStateException("User ID claim not found in JWT");
+        }
+
+        try {
+            return Long.valueOf(userIdClaim.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Invalid user ID format in JWT", e);
+        }
+    }
+
 
     /**
      * Fetches all products in the database depending on the request parameters
@@ -73,15 +88,12 @@ public class ProductController {
      * @return HTTP status code indicating success or failure
      */
     @PostMapping("")
-    public ResponseEntity<String > addProduct(
+    public ResponseEntity<String > addProduct (
             @RequestPart ProductDTO productDTO,
-            @RequestPart MultipartFile file) {
-        try{
-            productService.addProduct(productDTO,file);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Product added successfully");
-        }catch(IOException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
-        }
+            @RequestPart MultipartFile file) throws IOException {
+        log.info(userId().toString());
+        return productService.addProduct(productDTO, file);
+
     }
 
     /**
@@ -110,5 +122,11 @@ public class ProductController {
     public ResponseEntity<List<ProductDTO>> search(@RequestParam String name){
         var products = productService.searchProduct(name);
         return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    @PostMapping("/addToCart/{productId}")
+    public ResponseEntity<String> addToCart(@PathVariable Long productId){
+        Long userId = userId();
+        return productService.addToCart(userId, productId);
     }
 }

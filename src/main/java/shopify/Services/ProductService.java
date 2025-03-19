@@ -1,13 +1,17 @@
 package shopify.Services;
 
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.Authentication;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import shopify.Data.DTOs.ProductDTO;
 import shopify.Data.Models.Product;
+import shopify.Data.Models.Seller;
 import shopify.Data.Models.User;
+import shopify.Data.Models.Buyer;
 import shopify.Repositories.ProductRepository;
 import shopify.Repositories.UserRepository;
 
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
  * Service that handles business logic for product-related operations,
  * including creation, retrieval, and searching.
  */
+@Slf4j
 @Service
 public class ProductService {
 
@@ -43,23 +48,35 @@ public class ProductService {
      * @throws IOException If there's an error reading the file
      */
     @Transactional
-    public void addProduct(ProductDTO body, MultipartFile file) throws IOException {
+    public ResponseEntity<String> addProduct(ProductDTO body, MultipartFile file) throws IOException {
         String username = userService.authenticatedUsername();
         User user = userRepository.findByUsername(username).
                 orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        Product newProduct = new Product(body.getName(), body.getDescription(), body.getPrice(), user);
-        newProduct.setImageName(file.getName());
-        newProduct.setImageType(file.getContentType());
-        newProduct.setImageData(file.getBytes());
-        Set<Product> products = user.getProducts();
-        products.add(newProduct);
-        user.setProducts(products);
-        productRepository.save(newProduct);
+        if (user instanceof Seller) {
+            Seller seller = (Seller) user;
+
+            Product product = new Product(
+                    body.getName(), body.getDescription(),
+                    body.getPrice(), file.getOriginalFilename(),
+                    file.getContentType(), file.getBytes());
+            product.setSeller(seller);
+            seller.getProducts().add(product);
+            productRepository.save(product);
+
+            userRepository.save(seller);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("Product added successfully");
+
+        }
+        if (user instanceof Buyer){
+            return ResponseEntity.status(HttpStatus.CREATED).body("Create a seller account to add products");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(" Something went wrong please try again later");
     }
 
     /**
      * Fetches a single product by its ID
-     * @param id The ID of the product
+     * @param id The ID of the productI
      * @return The product or null if not found
      */
     @Transactional
@@ -79,7 +96,7 @@ public class ProductService {
      */
     @Transactional
     public List<ProductDTO> getMyProduct(Long id) {
-        List<Product> products = productRepository.findByAssignedUser_Id(id);
+        List<Product> products = productRepository.findBySeller_Id(id);
         return products.stream().map(ProductDTO::new).collect(Collectors.toList());
     }
 
@@ -94,5 +111,31 @@ public class ProductService {
                 .stream()
                 .map(ProductDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ResponseEntity<String> addToCart(Long userId, Long productId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if(userOptional.isPresent() && productOptional.isPresent()){
+            Buyer buyer = (Buyer) userOptional.get();
+            Product product = productOptional.get();
+            buyer.getCart().add(product);
+            userRepository.save(buyer);
+
+            product.getBuyers().add(buyer);
+            productRepository.save(product);
+            return ResponseEntity.ok().body("Added to cart");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not add to cart");
+    }
+
+    @Transactional
+    public List<ProductDTO> myCart(Long aLong) {
+        Buyer user = (Buyer) userRepository.findById(aLong)
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid user"));
+
+        Set<Product> products = user.getCart();
+        return products.stream().map(ProductDTO::new).collect(Collectors.toList());
     }
 }
