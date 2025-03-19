@@ -76,16 +76,9 @@ public class AuthenticationController {
      */
     @PostMapping("/signIn")
     public ResponseEntity<List<String>> signIn(@RequestBody SignInDTO body){
-        try{
-            User user = userRepository.findByUsername(body.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-            authenticationService.signIn(body.getUsername(), body.getPassword());
-            return ResponseEntity.ok(List.of(tokenService.generate(user), user.getId().toString()));
-        }catch (UsernameNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of("User not found"));
-        }
-        catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of("username or password is incorrect"));
-        }
+        User user = userRepository.findByUsername(body.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        authenticationService.signIn(body.getUsername(), body.getPassword(), user);
+        return ResponseEntity.ok(List.of(tokenService.generate(user), user.getId().toString()));
     }
 }

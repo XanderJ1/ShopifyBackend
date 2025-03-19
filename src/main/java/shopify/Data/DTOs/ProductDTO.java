@@ -17,6 +17,7 @@ public class ProductDTO {
     private String imageType;
     private String imageData;
 
+
     public ProductDTO(){
 
     }
