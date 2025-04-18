@@ -1,13 +1,12 @@
 package shopify.Data.Models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,6 +17,8 @@ public class Seller extends User{
     @JsonManagedReference
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     private Set<Product> products = new HashSet<>();
+    @OneToMany(mappedBy = "seller")
+    private List<Order> orders = new ArrayList<>();
 
     public Seller(){
         super();

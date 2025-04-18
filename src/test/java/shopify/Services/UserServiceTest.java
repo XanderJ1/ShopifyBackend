@@ -11,7 +11,6 @@ import shopify.Data.Models.Role;
 import shopify.Data.Models.User;
 import shopify.Repositories.UserRepository;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +33,7 @@ class UserServiceTest {
     User user = new User("Josh",
             "kong",
             "Lane@jj.com",
-            Role.USER);
+            Role.BUYER);
 
     @Test
     @Disabled

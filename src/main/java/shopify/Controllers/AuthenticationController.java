@@ -2,7 +2,10 @@ package shopify.Controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +18,7 @@ import shopify.Services.AuthenticationService;
 import shopify.Services.TokenService;
 import shopify.Services.UserService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,6 +83,13 @@ public class AuthenticationController {
         User user = userRepository.findByUsername(body.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
         authenticationService.signIn(body.getUsername(), body.getPassword(), user);
-        return ResponseEntity.ok(List.of(tokenService.generate(user), user.getId().toString()));
+        String fullname = "Bashir Zakariyya Yakub";
+        String [] initials = fullname.split(" ");
+        char [] initial = new char[initials.length];
+        for (int i =0; i < initials.length; i++){
+            initial[i] = initials[i].charAt(0);
+        }
+        System.out.println(Arrays.toString(initial)+ user.getRole().toString());
+        return ResponseEntity.ok(List.of(tokenService.generate(user), user.getRole().toString(),new String(initial)));
     }
 }

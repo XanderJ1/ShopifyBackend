@@ -77,6 +77,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth ->{
                             auth.requestMatchers("api/v1/users/**").permitAll();
+                            auth.requestMatchers("api/v1/products/**").permitAll();
                             auth.requestMatchers("auth/**").permitAll();
                             auth.requestMatchers("/**").permitAll();
                             auth.anyRequest().authenticated();
@@ -133,6 +134,7 @@ public class SecurityConfig {
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        corsConfiguration.addAllowedOrigin("http://127.0.0.1:5500");
         corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

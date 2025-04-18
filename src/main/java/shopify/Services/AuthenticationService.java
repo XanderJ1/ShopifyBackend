@@ -10,8 +10,10 @@
     import org.springframework.security.authentication.AuthenticationManager;
     import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
     import org.springframework.security.core.Authentication;
+    import org.springframework.security.core.context.SecurityContextHolder;
     import org.springframework.security.core.userdetails.UsernameNotFoundException;
     import org.springframework.security.crypto.password.PasswordEncoder;
+    import org.springframework.security.oauth2.jwt.Jwt;
     import org.springframework.stereotype.Service;
     import shopify.Data.DTOs.UserDTO;
     import shopify.Data.DTOs.SignInDTO;
@@ -24,7 +26,6 @@
 
     import static shopify.Data.Models.Role.*;
 
-    @Transactional
     @Service
     public class AuthenticationService {
 
@@ -47,6 +48,30 @@
             this.tokenService = tokenService;
         }
 
+
+         /**
+         * This method extracts the current user's id to make operations that needs the user's ID
+         * @return Long user's  ID
+         */
+        public Long userId() {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
+                throw new IllegalStateException("User not authenticated");
+            }
+
+            Object userIdClaim = jwt.getClaim("user_id");
+            if (userIdClaim == null) {
+                throw new IllegalStateException("User ID claim not found in JWT");
+            }
+
+            try {
+                return Long.valueOf(userIdClaim.toString());
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("Invalid user ID format in JWT", e);
+            }
+        }
+
+
         /**
          * Adds a user to the user database
          * @param user userDTO with details to be added
@@ -63,12 +88,12 @@
                 userRepository.save(newUser);
             }
             // If user has role a user
-            else if (user.getRole().equalsIgnoreCase(USER.toString())) {
+            else if (user.getRole().equalsIgnoreCase(BUYER.toString())) {
                 Buyer newUser = new Buyer(
                         user.getUsername(),
                         passwordEncoder.encode(user.getPassword()),
                         user.getEmail(),
-                        USER
+                        BUYER
                 );
                 userRepository.save(newUser);
             }else{
@@ -76,7 +101,7 @@
                         user.getUsername(),
                         passwordEncoder.encode(user.getPassword()),
                         user.getEmail(),
-                        USER
+                        BUYER
                 );
                 userRepository.save(newUser);
             }

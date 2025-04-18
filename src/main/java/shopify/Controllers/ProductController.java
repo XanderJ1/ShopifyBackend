@@ -5,20 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import shopify.Data.DTOs.ProductDTO;
-import shopify.Data.Models.User;
+import shopify.Data.Models.Order;
 import shopify.Repositories.ProductRepository;
+import shopify.Services.AuthenticationService;
 import shopify.Services.ProductService;
 import shopify.Services.UserService;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,30 +27,29 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     @Autowired
-    UserService userService;
+    private final UserService userService;
 
     @Autowired
-    ProductService productService;
+    private final ProductService productService;
 
     @Autowired
-    ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-    public Long userId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
-            throw new IllegalStateException("User not authenticated");
-        }
 
-        Object userIdClaim = jwt.getClaim("user_id");
-        if (userIdClaim == null) {
-            throw new IllegalStateException("User ID claim not found in JWT");
-        }
+    private final AuthenticationService authenticationService;
 
-        try {
-            return Long.valueOf(userIdClaim.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("Invalid user ID format in JWT", e);
-        }
+    public ProductController(UserService userService,
+                             ProductService productService,
+                             ProductRepository productRepository,
+                             AuthenticationService authenticationService) {
+        this.userService = userService;
+        this.productService = productService;
+        this.productRepository = productRepository;
+        this.authenticationService = authenticationService;
+    }
+
+    public Long userId(){
+        return authenticationService.userId();
     }
 
 
@@ -128,5 +124,20 @@ public class ProductController {
     public ResponseEntity<String> addToCart(@PathVariable Long productId){
         Long userId = userId();
         return productService.addToCart(userId, productId);
+    }
+
+    @PostMapping("/buy")
+    public ResponseEntity<String> buy(Long productId){
+        return productService.buy(userId(), productId);
+    }
+
+    @GetMapping("/buyerOrders")
+    public ResponseEntity<List<Order>> buyerOrders(){
+        return productService.fetchBuyerOrders(userId());
+    }
+
+    @GetMapping("/sellerOrders")
+    public ResponseEntity<List<Order>> sellerOrders(){
+        return productService.fetchSellerOrders(userId());
     }
 }

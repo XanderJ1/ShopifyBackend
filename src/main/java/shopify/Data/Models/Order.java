@@ -3,11 +3,17 @@ package shopify.Data.Models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -24,6 +30,9 @@ public class Order {
     )
     @JsonManagedReference
     private Set<Product> products = new HashSet<>();
+
+    @ManyToOne()
+    private Seller seller;
     private String shippingAddress;
     @ManyToOne
     @JoinColumn(name = "buyer_id", nullable = false)
@@ -31,4 +40,10 @@ public class Order {
     private String paymentMethod;
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    public Order(Set<Product> products, Seller seller, Buyer customer) {
+        this.products = products;
+        this.seller = seller;
+        this.customer = customer;
+    }
 }

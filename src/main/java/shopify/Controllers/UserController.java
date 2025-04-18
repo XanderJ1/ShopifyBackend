@@ -27,6 +27,7 @@ public class UserController {
 
     final private ProductService productService;
     final private UserService userService;
+    final private AuthenticationService authenticationService;
 
     public  UserController(
             ProductService productService,
@@ -34,29 +35,11 @@ public class UserController {
             UserService userService){
         this.productService = productService;
         this.userService = userService;
+        this.authenticationService = authenticationService;
     }
 
-    /**
-     * This method extracts the current user's id to make operations that needs the user's ID
-     * @return Long user's  ID
-     */
-    public Long userId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth + "Hash" + auth.getPrincipal());
-        if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
-            throw new IllegalStateException("User not authenticated");
-        }
-
-        Object userIdClaim = jwt.getClaim("user_id");
-        if (userIdClaim == null) {
-            throw new IllegalStateException("User ID claim not found in JWT");
-        }
-
-        try {
-            return Long.valueOf(userIdClaim.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("Invalid user ID format in JWT", e);
-        }
+    public Long userId(){
+        return authenticationService.userId();
     }
 
     /**
@@ -79,7 +62,8 @@ public class UserController {
 
     @GetMapping("/cart")
     public ResponseEntity<List<ProductDTO>> myCart(){
-        return ResponseEntity.status(HttpStatus.OK).body(productService.myCart(2L));
+        System.out.println();
+        return productService.myCart(userId());
     }
 
 

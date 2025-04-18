@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,11 +21,11 @@ public class Buyer extends User {
             joinColumns = @JoinColumn(name = "buyer_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private Set<Product> cart = new HashSet<>();
+    private List<Product> cart = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Order> orders = new HashSet<>();
+    private List<Order> orders = new ArrayList<>();
 
     public Buyer(){
 

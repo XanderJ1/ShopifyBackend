@@ -6,10 +6,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import shopify.Data.Models.Role;
 import shopify.Data.Models.User;
 
-import java.util.HashSet;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+
 @DataJpaTest
 class UserRepositoryTest {
 
@@ -22,7 +20,7 @@ class UserRepositoryTest {
                 "Bashir",
                 "test",
                 "ba@gmail.com",
-                Role.USER
+                Role.BUYER
         );
 
         underTest.save(userTest);

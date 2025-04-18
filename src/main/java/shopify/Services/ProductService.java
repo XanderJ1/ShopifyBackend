@@ -8,10 +8,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import shopify.Data.DTOs.ProductDTO;
-import shopify.Data.Models.Product;
-import shopify.Data.Models.Seller;
-import shopify.Data.Models.User;
-import shopify.Data.Models.Buyer;
+import shopify.Data.Models.*;
+import shopify.Repositories.OrderRepository;
 import shopify.Repositories.ProductRepository;
 import shopify.Repositories.UserRepository;
 
@@ -32,13 +30,15 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
     public ProductService(ProductRepository productRepository,
                           UserService userService,
-                          UserRepository userRepository){
+                          UserRepository userRepository, OrderRepository orderRepository){
         this.productRepository = productRepository;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -131,11 +131,53 @@ public class ProductService {
     }
 
     @Transactional
-    public List<ProductDTO> myCart(Long aLong) {
-        Buyer user = (Buyer) userRepository.findById(aLong)
+    public ResponseEntity<List<ProductDTO>> myCart(Long aLong) {
+        User user = userRepository.findById(aLong)
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid user"));
 
-        Set<Product> products = user.getCart();
-        return products.stream().map(ProductDTO::new).collect(Collectors.toList());
+        if (!(user instanceof Buyer)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of(new ProductDTO()));
+        }
+        Buyer buyer = (Buyer) user;
+        List<Product> products = buyer.getCart();
+        return ResponseEntity.status(HttpStatus.OK).body(products.stream().map(ProductDTO::new).collect(Collectors.toList()));
+    }
+
+    public ResponseEntity<String> buy(Long aLong, Long productId) {
+
+        try {
+            User user = userRepository.findById(3L).orElseThrow(RuntimeException::new);
+            Product product = productRepository.findById(6L).orElseThrow(RuntimeException::new);
+            System.out.println(user.getUsername() + "<------>-" + product.getName());
+            Buyer buyer = (Buyer) user;
+            Set<Product> products = new HashSet<>();
+            products.add(product);
+            Order order = new Order(products, product.getSeller(), buyer);
+            order.setStatus(Status.INITIATED);
+            orderRepository.save(order);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("Order Created");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+    }
+
+    @Transactional
+    public ResponseEntity<List<Order>> fetchSellerOrders(Long aLong) {
+
+        User user = userRepository.findById(aLong).orElseThrow(RuntimeException::new);
+        Seller seller = (Seller) user;
+        List<Order> orders = seller.getOrders();
+        return ResponseEntity.status(HttpStatus.OK).body(orders);
+    }
+
+    @Transactional
+    public ResponseEntity<List<Order>> fetchBuyerOrders(Long aLong) {
+
+        User user = userRepository.findById(aLong).orElseThrow(RuntimeException::new);
+        Buyer buyer = (Buyer) user;
+        List<Order> orders = buyer.getOrders();
+        return ResponseEntity.status(HttpStatus.OK).body(orders);
     }
 }
