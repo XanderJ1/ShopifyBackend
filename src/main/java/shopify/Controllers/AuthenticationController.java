@@ -1,5 +1,6 @@
 package shopify.Controllers;
 
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import shopify.Data.DTOs.Frontend;
 import shopify.Data.DTOs.UserDTO;
 import shopify.Data.DTOs.SignInDTO;
 import shopify.Data.Models.User;
@@ -79,17 +81,13 @@ public class AuthenticationController {
      * <br> 400 (Bad Request) and failure message if authentication fails
      */
     @PostMapping("/signIn")
-    public ResponseEntity<List<String>> signIn(@RequestBody SignInDTO body){
+    public ResponseEntity<Frontend> signIn(@RequestBody SignInDTO body){
         User user = userRepository.findByUsername(body.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
         authenticationService.signIn(body.getUsername(), body.getPassword(), user);
-        String fullname = "Bashir Zakariyya Yakub";
-        String [] initials = fullname.split(" ");
-        char [] initial = new char[initials.length];
-        for (int i =0; i < initials.length; i++){
-            initial[i] = initials[i].charAt(0);
-        }
-        System.out.println(Arrays.toString(initial)+ user.getRole().toString());
-        return ResponseEntity.ok(List.of(tokenService.generate(user), user.getRole().toString(),new String(initial)));
+        String token = tokenService.generate(user);
+        UserDTO dto = new UserDTO(user.getRole().toString());
+        Frontend frontend = new Frontend(dto, token);
+        return ResponseEntity.ok(frontend);
     }
 }

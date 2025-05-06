@@ -126,18 +126,10 @@ public class ProductController {
         return productService.addToCart(userId, productId);
     }
 
-    @PostMapping("/buy")
-    public ResponseEntity<String> buy(Long productId){
-        return productService.buy(userId(), productId);
+    @PostMapping("/removeFromCart/{productId}")
+    public ResponseEntity<String> removeFromCart(@PathVariable Long productId){
+        return productService.removeFromCart(userId(), productId);
     }
 
-    @GetMapping("/buyerOrders")
-    public ResponseEntity<List<Order>> buyerOrders(){
-        return productService.fetchBuyerOrders(userId());
-    }
 
-    @GetMapping("/sellerOrders")
-    public ResponseEntity<List<Order>> sellerOrders(){
-        return productService.fetchSellerOrders(userId());
-    }
 }

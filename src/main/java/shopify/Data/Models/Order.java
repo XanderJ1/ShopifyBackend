@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class Order {
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     @JsonManagedReference
-    private Set<Product> products = new HashSet<>();
+    private List<Product> products = new ArrayList<>();
 
     @ManyToOne()
     private Seller seller;
@@ -41,7 +42,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Order(Set<Product> products, Seller seller, Buyer customer) {
+    public Order(List<Product> products, Buyer customer) {
         this.products = products;
         this.seller = seller;
         this.customer = customer;

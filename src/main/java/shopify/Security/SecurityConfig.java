@@ -28,6 +28,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.reactive.function.client.WebClient;
 import shopify.Services.UserService;
 import shopify.Utility.RSAKeyProperties;
 
@@ -79,7 +80,7 @@ public class SecurityConfig {
                             auth.requestMatchers("api/v1/users/**").permitAll();
                             auth.requestMatchers("api/v1/products/**").permitAll();
                             auth.requestMatchers("auth/**").permitAll();
-                            auth.requestMatchers("/**").permitAll();
+                            auth.requestMatchers("/api/v1/products").permitAll();
                             auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(oauth -> oauth.jwt( jwt -> jwt
@@ -142,4 +143,8 @@ public class SecurityConfig {
         return source;
     }
 
+    @Bean
+    WebClient webClient(WebClient.Builder webclient){
+        return webclient.build();
+    }
 }

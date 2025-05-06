@@ -122,7 +122,6 @@ public class ProductService {
             Product product = productOptional.get();
             buyer.getCart().add(product);
             userRepository.save(buyer);
-
             product.getBuyers().add(buyer);
             productRepository.save(product);
             return ResponseEntity.ok().body("Added to cart");
@@ -143,41 +142,18 @@ public class ProductService {
         return ResponseEntity.status(HttpStatus.OK).body(products.stream().map(ProductDTO::new).collect(Collectors.toList()));
     }
 
-    public ResponseEntity<String> buy(Long aLong, Long productId) {
 
-        try {
-            User user = userRepository.findById(3L).orElseThrow(RuntimeException::new);
-            Product product = productRepository.findById(6L).orElseThrow(RuntimeException::new);
-            System.out.println(user.getUsername() + "<------>-" + product.getName());
-            Buyer buyer = (Buyer) user;
-            Set<Product> products = new HashSet<>();
-            products.add(product);
-            Order order = new Order(products, product.getSeller(), buyer);
-            order.setStatus(Status.INITIATED);
-            orderRepository.save(order);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body("Order Created");
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    @Transactional
+    public ResponseEntity<String> removeFromCart(Long userId, Long productId) {
+        User user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
+        Product product = productRepository.findById(productId).orElseThrow(RuntimeException::new);
+        if (user instanceof Seller){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User must be a buyer");
         }
-
-    }
-
-    @Transactional
-    public ResponseEntity<List<Order>> fetchSellerOrders(Long aLong) {
-
-        User user = userRepository.findById(aLong).orElseThrow(RuntimeException::new);
-        Seller seller = (Seller) user;
-        List<Order> orders = seller.getOrders();
-        return ResponseEntity.status(HttpStatus.OK).body(orders);
-    }
-
-    @Transactional
-    public ResponseEntity<List<Order>> fetchBuyerOrders(Long aLong) {
-
-        User user = userRepository.findById(aLong).orElseThrow(RuntimeException::new);
         Buyer buyer = (Buyer) user;
-        List<Order> orders = buyer.getOrders();
-        return ResponseEntity.status(HttpStatus.OK).body(orders);
+        buyer.getCart().remove(product);
+        userRepository.save(buyer);
+
+        return ResponseEntity.status(HttpStatus.OK).body(String.format("%s has been removed", product.getName()));
     }
 }
