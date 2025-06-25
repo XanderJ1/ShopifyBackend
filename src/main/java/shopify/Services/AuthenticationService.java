@@ -107,10 +107,6 @@
             }
         }
 
-        public void signIn(SignInDTO body) {
-
-        }
-
         /**
          * Logs a user in
          * @param username user's username

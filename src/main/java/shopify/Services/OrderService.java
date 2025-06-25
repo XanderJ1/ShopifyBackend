@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class OrderService {
 
@@ -66,7 +68,7 @@ public class OrderService {
     }
 
     @Transactional
-    public ResponseEntity<String> order(Long userId, List<Long> productIds) {
+    public ResponseEntity<String> order(Long userId, List<Long> productIds, Integer discount) {
 
         try {
         User user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
@@ -81,12 +83,12 @@ public class OrderService {
         Order order = new Order(products, buyer);
         order.setStatus(Status.INITIATED);
         orderRepository.save(order);
-        PaymentDTO paymentDTO = new PaymentDTO(sum * 100, "bzakariyya6@gmail.com");
+        PaymentDTO paymentDTO = new PaymentDTO((sum - discount) * 100, "bzakariyya6@gmail.com");
         var response = url(paymentDTO).block();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = mapper.readTree(response);
         String url = node.path("data").path("authorization_url").asText();
-        System.out.println("Hashir \n" + url);
+        log.info(String.format("Url: %s", url));
         return ResponseEntity.status(HttpStatus.CREATED).body(url);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

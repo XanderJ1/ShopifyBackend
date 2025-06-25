@@ -1,0 +1,8 @@
+shopify
+shopify.Controllers
+shopify.Data.DTOs
+shopify.Data.Models
+shopify.Repositories
+shopify.Security
+shopify.Services
+shopify.Utility

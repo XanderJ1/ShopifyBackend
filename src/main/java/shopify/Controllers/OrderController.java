@@ -24,9 +24,9 @@ public class OrderController {
     public Long userId(){
         return authenticationService.userId();
     }
-    @PostMapping("/order/")
-    public ResponseEntity<String> buy(@RequestBody List<Long> productIds){
-        return orderService.order(userId(), productIds);
+    @PostMapping("")
+    public ResponseEntity<String> buy(@RequestBody List<Long> productIds, @RequestParam(required = false) Integer discount){
+        return orderService.order(userId(), productIds, discount);
     }
 
     @GetMapping("/cartSize")

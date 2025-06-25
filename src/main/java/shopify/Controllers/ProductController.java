@@ -131,5 +131,9 @@ public class ProductController {
         return productService.removeFromCart(userId(), productId);
     }
 
-
+    @DeleteMapping("removeProduct/{productId}")
+    public ResponseEntity<String> removeMyProduct(@PathVariable Long productId){
+        return productService.removeMyProduct(productId);
+    }
+ 
 }

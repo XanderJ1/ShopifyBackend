@@ -1,55 +1,75 @@
 package shopify.Services;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import shopify.Data.Models.Buyer;
 import shopify.Data.Models.Role;
 import shopify.Data.Models.User;
 import shopify.Repositories.UserRepository;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
     @Mock
-    UserRepository userRepository;
-    UserService underTest;
-    @BeforeEach
-    void setUp() {
-        underTest = new UserService(userRepository);
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private UserService userService;
+
+    @BeforeAll
+    public static void beforeIt(){
+
+    }
+
+    @Test
+    void loadUserByUsername() {
     }
 
     @Test
     void getAll() {
-        underTest.getAll();
-
-        verify(userRepository).findAll();
     }
-    User user = new User("Josh",
-            "kong",
-            "Lane@jj.com",
-            Role.BUYER);
 
     @Test
-    @Disabled
     void authenticatedUsername() {
+        String expectedUsername = "Juliana";
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(expectedUsername, "test");
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        String result = userService.authenticatedUsername();
+        assertEquals(expectedUsername, result);
     }
 
     @Test
-    @Disabled
     void update() {
-        underTest.update(user);
-        ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(argumentCaptor.capture());
+        Buyer existingMockUser = new Buyer("oldUser", "test", "oldEmail@gmail.com", Role.BUYER);
+        existingMockUser.setId(1L);
+        Buyer newMockUser = new Buyer("newUser", "test", "newEmail@gmail.com", Role.BUYER);
+        newMockUser.setId(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingMockUser));
+
+        String result = userService.update(newMockUser);
+        assertEquals("User is updated", result);
+        verify(userRepository).save(existingMockUser);
     }
 
     @Test
-    @Disabled
     void deleteUser() {
+        User mockUser = new User();
+        mockUser.setId(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+        String result = userService.deleteUser(1L);
+        assertEquals("User has been deleted", result);
     }
 }

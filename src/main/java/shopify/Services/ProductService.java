@@ -100,6 +100,12 @@ public class ProductService {
         return products.stream().map(ProductDTO::new).collect(Collectors.toList());
     }
 
+    public ResponseEntity<String> removeMyProduct(Long id){
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product does not exist"));
+        productRepository.delete(product);
+        return ResponseEntity.ok("Product has been removed");
+    }
     /**
      * Search for products by name
      * @param name name of the product

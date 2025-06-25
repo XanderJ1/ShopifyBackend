@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"shopify"},{"l":"shopify.Controllers"},{"l":"shopify.Data.DTOs"},{"l":"shopify.Data.Models"},{"l":"shopify.Repositories"},{"l":"shopify.Security"},{"l":"shopify.Services"},{"l":"shopify.Utility"}];updateSearchResults();
