@@ -4,20 +4,20 @@ import shopify.Data.Models.User;
 
 public class Frontend {
 
-    private UserDTO user;
+    private String role;
     private String token;
 
-    public Frontend(UserDTO user, String token) {
-        this.user = user;
+    public Frontend(String user, String token) {
+        this.role = user;
         this.token = token;
     }
 
-    public UserDTO getUser() {
-        return user;
+    public String  getRole() {
+        return role;
     }
 
-    public void setUser(UserDTO user) {
-        this.user = user;
+    public void getRole(String role) {
+        this.role = role;
     }
 
     public String getToken() {

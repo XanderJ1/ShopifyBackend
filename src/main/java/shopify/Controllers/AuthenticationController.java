@@ -15,6 +15,7 @@ import shopify.Data.DTOs.Frontend;
 import shopify.Data.DTOs.UserDTO;
 import shopify.Data.DTOs.SignInDTO;
 import shopify.Data.Models.User;
+import shopify.Exceptions.InternalServerError;
 import shopify.Repositories.UserRepository;
 import shopify.Services.AuthenticationService;
 import shopify.Services.TokenService;
@@ -66,8 +67,7 @@ public class AuthenticationController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists");
             }
             else {
-                authenticationService.addUser(user);
-                return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered");
+                return authenticationService.addUser(user);
             }
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enter username or password");
@@ -81,13 +81,7 @@ public class AuthenticationController {
      * <br> 400 (Bad Request) and failure message if authentication fails
      */
     @PostMapping("/signIn")
-    public ResponseEntity<Frontend> signIn(@RequestBody SignInDTO body){
-        User user = userRepository.findByUsername(body.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-        authenticationService.signIn(body.getUsername(), body.getPassword(), user);
-        String token = tokenService.generate(user);
-        UserDTO dto = new UserDTO(user.getRole().toString());
-        Frontend frontend = new Frontend(dto, token);
-        return ResponseEntity.ok(frontend);
+    public ResponseEntity<Frontend> signIn(@RequestBody SignInDTO body) throws InternalServerError {
+        return authenticationService.signIn(body);
     }
 }

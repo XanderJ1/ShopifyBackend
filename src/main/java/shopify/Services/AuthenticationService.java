@@ -1,13 +1,11 @@
-    /**
-     * This package contains business logic of controllers
-     */
-    package shopify.Services;
+package shopify.Services;
 
     import jakarta.transaction.Transactional;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.security.authentication.AuthenticationManager;
+    import org.springframework.security.authentication.BadCredentialsException;
     import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
     import org.springframework.security.core.Authentication;
     import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,11 +13,13 @@
     import org.springframework.security.crypto.password.PasswordEncoder;
     import org.springframework.security.oauth2.jwt.Jwt;
     import org.springframework.stereotype.Service;
+    import shopify.Data.DTOs.Frontend;
     import shopify.Data.DTOs.UserDTO;
     import shopify.Data.DTOs.SignInDTO;
     import shopify.Data.Models.Seller;
     import shopify.Data.Models.User;
     import shopify.Data.Models.Buyer;
+    import shopify.Exceptions.InternalServerError;
     import shopify.Repositories.UserRepository;
 
     import java.util.List;
@@ -76,7 +76,7 @@
          * Adds a user to the user database
          * @param user userDTO with details to be added
          */
-        public void addUser(UserDTO user){
+        public ResponseEntity<String > addUser(UserDTO user){
             // If user is a seller
             if (user.getRole().equalsIgnoreCase(SELLER.toString())) {
                 Seller newUser = new Seller(
@@ -105,22 +105,25 @@
                 );
                 userRepository.save(newUser);
             }
+            return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered");
         }
 
         /**
          * Logs a user in
-         * @param username user's username
-         * @param password user's password
+         * @param body contains user's username and password
          */
-        public ResponseEntity<List<String>> signIn(String username, String password, User user) {
+        public ResponseEntity<Frontend> signIn(SignInDTO body) throws InternalServerError {
             try{
-                Authentication auth = authenticationManager
-                        .authenticate( new UsernamePasswordAuthenticationToken(username, password));
-                return ResponseEntity.ok(List.of(tokenService.generate(user), user.getId().toString()));
+                User user = userRepository.findByUsername(body.getUsername())
+                        .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(body.getUsername(), body.getPassword()));
+                String token = tokenService.generate(user);
+                Frontend frontend = new Frontend(user.getRole().toString(), token);
+                return ResponseEntity.ok(frontend);
             }catch (UsernameNotFoundException e){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of("User not found"));
+                throw new BadCredentialsException("Username and password is incorrect");
             }catch (Exception e){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of("Username or password is incorrect"));
+                throw new InternalServerError("Something went wrong");
             }
         }
     }

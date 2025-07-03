@@ -1,5 +1,6 @@
 package shopify.Data.DTOs;
 
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 import shopify.Data.Models.User;
 
@@ -7,6 +8,7 @@ import shopify.Data.Models.User;
 public class UserDTO {
     private String username;
     private String password;
+    @Email
     private String email;
     private String role;
 

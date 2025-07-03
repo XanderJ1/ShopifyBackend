@@ -61,12 +61,9 @@ public class ProductController {
      */
     @GetMapping("")
     public ResponseEntity<List<ProductDTO>> fetchAll(@RequestParam(required = false) String sort, @RequestParam(required = false) String filter){
-        if (sort != null && filter != null){
-
-        }
         if (sort != null){
             List<ProductDTO> Products = productRepository.findAll(Sort.by(sort)).stream()
-                    .map(ProductDTO::new).collect(Collectors.toList());
+                    .map(ProductDTO::new).toList();
         }
         if (filter != null){
 
