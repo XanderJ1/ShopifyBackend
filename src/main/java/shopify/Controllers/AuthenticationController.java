@@ -1,6 +1,7 @@
 package shopify.Controllers;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -60,7 +61,7 @@ public class AuthenticationController {
      * <br> 400 (Bad Request) if the user already exists or required fields are missing.
      */
     @PostMapping("/register")
-    public ResponseEntity<String > register(@RequestBody UserDTO user){
+    public ResponseEntity<String > register(@Valid @RequestBody UserDTO user){
         if (user.getUsername() != null && user.getPassword() != null){
             Optional<User> newUser = userRepository.findByUsername(user.getUsername());
             if (newUser.isPresent()){
@@ -81,7 +82,7 @@ public class AuthenticationController {
      * <br> 400 (Bad Request) and failure message if authentication fails
      */
     @PostMapping("/signIn")
-    public ResponseEntity<Frontend> signIn(@RequestBody SignInDTO body) throws InternalServerError {
+    public ResponseEntity<Frontend> signIn(@Valid @RequestBody SignInDTO body) throws InternalServerError {
         return authenticationService.signIn(body);
     }
 }

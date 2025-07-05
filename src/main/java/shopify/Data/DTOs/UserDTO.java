@@ -1,12 +1,15 @@
 package shopify.Data.DTOs;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import shopify.Data.Models.User;
 
 @Data
 public class UserDTO {
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
     @Email
     private String email;

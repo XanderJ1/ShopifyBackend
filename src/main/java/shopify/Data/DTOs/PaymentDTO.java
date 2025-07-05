@@ -7,7 +7,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class PaymentDTO {
 
-
     private int amount;
     private String email;
 }
